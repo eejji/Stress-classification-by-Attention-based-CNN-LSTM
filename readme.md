@@ -4,7 +4,7 @@
 **Conference:** 2024 International Conference on Machine Learning and Applications (ICMLA)   
 **Date:** 18-20 December 2024   
 **Location:** Miami, FL, USA   
-**DOI:** 10.1109/ICMLA61862.2024.00211   
+**DOI:** [10.1109/ICMLA61862.2024.00211](https://ieeexplore.ieee.org/abstract/document/10903250)
 
 ## Task- At A Glance:
 Through the Attention-based CNN-LSTM model, single and continuous-cycle ECG feature are extracted and fused to diagnose mental stress.  

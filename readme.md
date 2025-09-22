@@ -21,5 +21,6 @@ Stress is a state of tension felt when exposed to a difficult situation, and exc
 
 ##### **Keywords:**  Stress, Electrocardiogram, Convolutional Neural Network, Long short-term memory, Attention mechanism, Deep learning 
 
-##### Work flow
-![image](<img width="14923" height="3536" alt="Image" src="https://github.com/user-attachments/assets/779e19ce-f524-45d4-9254-027504ca0ab2" />)
+
+## Work flow
+![image](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Flowchart.png)

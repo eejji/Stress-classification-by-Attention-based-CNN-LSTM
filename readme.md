@@ -24,3 +24,21 @@ Stress is a state of tension felt when exposed to a difficult situation, and exc
 
 ## Work flow
 ![image](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Flowchart.png)
+
+## Proposed Attention-based CNN-LSTM
+![image](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Proposed_CNN_LSTM.jpg)
+
+The proposed model fuses **Beat ECG** and **Rhythm ECG** signals through parallel CNN and LSTM layers.
+
+- **Convolution Block**  
+  - Two 1D Convolutions + BatchNorm + ReLU  
+  - Residual mapping & MaxPooling for stable deep learning  
+- **Beat Network**: 3 convolution blocks  
+- **Rhythm Network**: 9 convolution blocks  
+- **Fusion & LSTM**: Combined features are processed by LSTM to capture temporal patterns  
+- **Attention Layer**: Focuses on important time-dependent features  
+- **Output**: Fully connected layer for final stress classification  
+
+➡️ Overall flow:  
+**Beat & Rhythm ECG → CNN Blocks → Fusion → LSTM → Attention → Fully Connected Layer → Classification**
+

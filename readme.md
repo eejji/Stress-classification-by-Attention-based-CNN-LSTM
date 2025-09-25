@@ -42,3 +42,16 @@ The proposed model fuses **Beat ECG** and **Rhythm ECG** signals through paralle
 ➡️ Overall flow:  
 **Beat & Rhythm ECG → CNN Blocks → Fusion → LSTM → Attention → Fully Connected Layer → Classification**
 
+
+## Preprocessing 
+- **Preprocessing**: 1. low-pass (100 Hz), 2. high-pass (0.5 Hz), 3. Notch (57-63 Hz)
+
+![Preprocessing](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Preprocessing.png)
+
+## Segmentation
+- **Beat ECG**: 0.64 s
+- **RHythm ECG**: 10 s
+  
+![Segmentation](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Segmentation.png)
+
+

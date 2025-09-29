@@ -25,6 +25,19 @@ Stress is a state of tension felt when exposed to a difficult situation, and exc
 ## Work flow
 ![image](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Flowchart.png)
 
+
+## Preprocessing 
+- **Preprocessing**: 1. low-pass (100 Hz), 2. high-pass (0.5 Hz), 3. Notch (57-63 Hz)
+
+![Preprocessing](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Preprocessing.png)
+
+## Segmentation
+- **Beat ECG**: 0.64 s (R_P: 0.24 s, R_A: 0.4 s)
+- **RHythm ECG**: 10 s
+  
+![Segmentation](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Segmentation.png)
+
+
 ## Proposed Attention-based CNN-LSTM
 ![image](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Proposed_CNN_LSTM.jpg)
 
@@ -43,15 +56,11 @@ The proposed model fuses **Beat ECG** and **Rhythm ECG** signals through paralle
 **Beat & Rhythm ECG → CNN Blocks → Fusion → LSTM → Attention → Fully Connected Layer → Classification**
 
 
-## Preprocessing 
-- **Preprocessing**: 1. low-pass (100 Hz), 2. high-pass (0.5 Hz), 3. Notch (57-63 Hz)
-
-![Preprocessing](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Preprocessing.png)
-
-## Segmentation
-- **Beat ECG**: 0.64 s
-- **RHythm ECG**: 10 s
-  
-![Segmentation](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Segmentation.png)
+## Result
+This project evaluates model performance using 5-fold cross-validation. The performance of individual networks (Beat, Rhythm) is compared with that of the combined Fusion models.   
+- The **Beat Network** and **Rhythm Network** were evaluated independently.
+- The **Fusion model**, which combines both networks, showed a significant improvement in performance.
+- The final model, with an **Attention mechanism**, achieved the best performance with an **average accuracy of 97%** and an **F1 Score of 0.969**.
+![image](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Performance_table.png)
 
 

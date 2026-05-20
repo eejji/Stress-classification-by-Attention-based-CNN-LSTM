@@ -16,6 +16,13 @@ This project presents a deep learning approach to **mental stress classification
 
 Most prior work relied on either a single ECG cycle or a continuous cycle — but not both. This model fuses both representations in parallel to capture both short-term waveform features and long-term temporal patterns, achieving state-of-the-art performance.
 
+## Key Contribution
+
+> **Problem:** Using only a single ECG cycle misses long-term temporal patterns; using only a continuous cycle misses fine-grained waveform morphology.  
+> **Solution:** A parallel dual-branch architecture that simultaneously learns from both Beat ECG and Rhythm ECG, fused through independent CNN → LSTM → Attention pipelines per branch.
+
+**Keywords:** Stress · Electrocardiogram · CNN · LSTM · Attention Mechanism · Deep Learning
+
 | Item | Detail |
 |------|--------|
 | **Task** | 3-class mental stress classification (Excitement / Neutral / Stress) |
@@ -33,37 +40,68 @@ Stress is a state of tension felt when exposed to a difficult situation, and exc
 ##### **Keywords:**  Stress, Electrocardiogram, Convolutional Neural Network, Long short-term memory, Attention mechanism, Deep learning 
 
 
-## Work flow
-![image](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Flowchart.png)
+## Pipeline
 
+![Workflow](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Flowchart.png)
 
-## Preprocessing 
-Three-stage filtering to clean the raw ECG signal:
+---
 
-1. **Low-pass filter** — 100 Hz cutoff
-2. **High-pass filter** — 0.5 Hz cutoff
-3. **Notch filter** — 57–63 Hz (powerline noise removal)
+## Dataset: DREAMER
+
+The [DREAMER dataset](https://ieeexplore.ieee.org/document/7887697) contains ECG recordings from **23 subjects** who watched emotion-eliciting film clips. Each subject rated their emotional state on Valence and Arousal scales (1–5).
+
+Class labels are assigned using the **Valence-Arousal 2D emotion model**:
+
+| Class | Valence | Arousal | Quadrant |
+|-------|---------|---------|----------|
+| **Excitement** | > 3 | > 3 | High Arousal, High Valence (Q1) |
+| **Stress** | < 3 | > 3 | High Arousal, Low Valence (Q2) |
+| **Neutral** | — | — | ECG baseline (resting state) |
+
+The raw DREAMER `.mat` file is parsed by `Create_dataset.ipynb`, which extracts, denoises, normalizes, and saves a preprocessed `.pkl` file per subject.
+
+---
+
+## Preprocessing
+
+Three-stage Butterworth filtering (order=2) to clean the raw ECG signal:
+
+1. **High-pass filter** — 0.5 Hz cutoff (baseline wander removal)
+2. **Band-stop filter** — 57–63 Hz (powerline noise removal)
+3. **Low-pass filter** — 100 Hz cutoff (high-frequency noise removal)
+
+After filtering, each signal is normalized with **MinMax scaling** to [0, 1].  
+R-peaks are detected using **NeuroKit2** (`method='neurokit'`, sampling rate = 256 Hz).
 
 ![Preprocessing](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Preprocessing.png)
 
-## Segmentation
-Two complementary signal windows are extracted per subject:
+---
 
-| Type | Duration | Description |
-|------|----------|-------------|
-| **Beat ECG** | 0.64 s | Single cardiac cycle (0.24 s pre-R, 0.40 s post-R) |
-| **Rhythm ECG** | 10 s | Continuous multi-cycle window |
-  
+## Segmentation
+
+Two complementary signal windows are extracted per R-peak:
+
+| Type | Samples | Duration | Description |
+|------|---------|----------|-------------|
+| **Beat ECG** | 163 | ~0.64 s | Single cardiac cycle (61 samples pre-R, 102 samples post-R) |
+| **Rhythm ECG** | 1280 | 5 s | 102 samples post-R based on R-peak, 5 seconds |
+
+Beat and Rhythm segments are aligned by index so each sample pair feeds into the dual-branch model simultaneously.
+
 ![Segmentation](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Segmentation.png)
 
+---
 
-## Proposed Attention-based CNN-LSTM
-![image](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Proposed_CNN_LSTM.jpg)
+## Model Architecture
+
+![Model](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Proposed_CNN_LSTM.jpg)
+
 ```
 Beat ECG  ──► CNN Blocks (×3)  ─┐
                                   ├──► Fusion ──► LSTM ──► Attention ──► FC ──► Class
 Rhythm ECG ──► CNN Blocks (×9) ─┘
 ```
+
 **Convolution Block (shared building block)**
 - Two 1D Convolutions + BatchNorm + ReLU
 - Residual connection + MaxPooling for training stability
@@ -79,9 +117,26 @@ Rhythm ECG ──► CNN Blocks (×9) ─┘
 
 ---
 
-## Result
-This project evaluates model performance using 5-fold cross-validation.   
-The performance of individual networks (Beat, Rhythm) is compared with that of the combined Fusion models.   
+## Training Configuration
+
+| Hyperparameter | Value |
+|----------------|-------|
+| Optimizer | Adam |
+| Learning rate | 0.0001 |
+| Loss | Categorical cross-entropy |
+| Batch size | 32 |
+| Epochs | 60 |
+| Early stopping | patience=15, min_delta=0.005, monitor=val_loss |
+| Cross-validation | 10-fold Stratified K-Fold (random_state=42) |
+| Random seed | 12 (NumPy) |
+
+---
+
+## Results
+
+10-fold stratified cross-validation on the DREAMER database:
+
+![Performance Table](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Performance_table.png)
 
 | Model | Accuracy | F1-Score |
 |-------|----------|----------|
@@ -93,13 +148,56 @@ The performance of individual networks (Beat, Rhythm) is compared with that of t
 - **+5.5% accuracy** and **+0.055 F1** over rhythm-only baseline
 - All classes exceeded **97% precision** in the best fold
 
+Evaluation metrics reported per fold: Accuracy, Precision, Recall, Specificity, F1-Score, Confusion Matrix.
+
 ---
-![image](https://github.com/eejji/Stress-classification-by-Attention-based-CNN-LSTM/blob/main/image/Performance_table.png)
 
+## Project Structure
 
-## Conclusion
-This study proposes an Attention-based CNN-LSTM model that uses a single cycle and a continuous cycle of ECG together for stress diagnosis. The proposed model integrates single and continuous ECG cycles through its Beat and Rhythm networks, which operate in parallel. By utilizing repeated convolution blocks for feature extraction and enhancing pattern recognition with LSTM and Attention mechanisms, the model demonstrates comprehensive learning analysis. We achieved an average accuracy of 97% and an average F1 score of 0.969 as a result of the 5-fold cross validation performance evaluation. The accuracy increased by about 22% and the F1 score increased by 0.21 compared to the case of using only a single cycle, and the accuracy increased by about 7% and the F1 score increased by 0.07 compared to the case of using only a continuous cycle. In the 5th Fold of the cross-validation, all classes showed high predictive performance of more than 97%. These results demonstrate improved performance when single and continuous cycles are used together, as opposed to using either single-cycle or continuous-cycle methods. In future studies, we plan to improve accuracy and reliability by devising model weight reduction, model interpretability, and generalization verification methods.
+```
+.
+├── Create_dataset.ipynb   # Parse DREAMER .mat → denoised .pkl
+├── FusionNetwork.ipynb    # Training loop with 10-fold CV
+├── Model_selection.py     # Model definition (fusion_model, DotProductAttention)
+├── data_utils.py          # Signal filtering, R-peak detection, segmentation, normalization
+├── Plot_utils.py          # Learning curves and confusion matrix visualization
+├── requirements.txt       # Python dependencies
+└── image/                 # Figures used in README and paper
+```
 
+---
+
+## Installation
+
+```bash
+pip install -r requirements.txt
+```
+
+## Usage
+
+### 1. Prepare Dataset
+
+Download the [DREAMER dataset](https://ieeexplore.ieee.org/document/7887697) (`.mat` format) and update the path in `Create_dataset.ipynb`:
+
+```python
+mat_path = "path/to/DREAMER.mat"
+save_path = "path/to/Denoised.pkl"
+```
+
+Run all cells in `Create_dataset.ipynb` to generate the preprocessed pickle file.
+
+### 2. Train the Model
+
+Update the paths in `FusionNetwork.ipynb`:
+
+```python
+pkl_path    = "path/to/Denoised.pkl"
+model_save_path = "path/to/save/models/"
+```
+
+Run all cells to execute 10-fold cross-validation. Each fold saves the best model as `.h5` and prints accuracy, F1-score, and the confusion matrix.
+
+---
 
 ## Citation
 
